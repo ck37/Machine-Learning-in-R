@@ -1,12 +1,9 @@
-# See the Fall 2020 tidymodels update!
-https://github.com/dlab-berkeley/Machine-Learning-with-tidymodels
-
 # Machine Learning in R
 
-This is the repository for D-Lab’s Introduction to Machine Learning in R workshop. [View the associated slides here](https://dlab-berkeley.github.io/Machine-Learning-in-R/slides.html#1).
+This is the repository for Chris’s Machine Learning in R workshop. [View the associated slides here](https://ck37.github.io/Machine-Learning-in-R/slides.html#1).
 
 RStudio Binder:
-[![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/dlab-berkeley/Machine-Learning-in-R/master?urlpath=rstudio)
+[![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/ck37/Machine-Learning-in-R/main?urlpath=rstudio)
 
 ## Content outline
 
@@ -22,8 +19,6 @@ RStudio Binder:
       - Random forests
       - Gradient boosted machines
       - SuperLearner ensembling
-      - Principal component analysis  
-      - Hierarchical agglomerative clustering  
   - Challenge questions  
   
 ## Getting started
