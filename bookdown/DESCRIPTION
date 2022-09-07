@@ -1,0 +1,7 @@
+Package: placeholder
+Type: Book
+Title: Does not matter.
+Version: 0.0.1
+Imports: gbm, randomForest, ranger, rpart, xgboost, ggplot2, rpart.plot, caret,
+SuperLearner, remotes, dplyr, mlbench, pROC
+Remotes: rstudio/bookdown, ck37/ck37r

@@ -1,0 +1,12 @@
+# Directory used to host the website for this tutorial.
+doc_dir=docs
+
+docs:
+	Rscript -e "rmarkdown::render('1-overview.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('2-preprocessing.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('3-lasso.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('4-decision-trees.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('5-overview.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('6-random-forest.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('7-ensembles.Rmd', output_dir = '${doc_dir}')"
+	Rscript -e "rmarkdown::render('docs/slides.Rmd', output_dir = '${doc_dir}')"
