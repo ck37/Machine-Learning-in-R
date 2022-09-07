@@ -5,6 +5,8 @@ This is the repository for Chris’s Machine Learning in R workshop. [View the a
 RStudio Binder:
 [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/ck37/Machine-Learning-in-R/main?urlpath=rstudio)
 
+[RStudio Cloud project](https://rstudio.cloud/content/4460169)
+
 ## Content outline
 
   - Background on machine learning
