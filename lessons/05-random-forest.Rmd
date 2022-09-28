@@ -3,8 +3,10 @@
 ## Load packages
 
 ```{r load_packages}
+# randomForest
 library(ranger)
-library(vip)
+# rborist
+library(vip) # vip - 
 library(ggplot2)
 ```
 
@@ -21,7 +23,9 @@ load("data/preprocessed.RData")
 
 The random forest algorithm seeks to improve on the performance of a single decision tree by taking the average of many trees. Thus, a random forest can be viewed as an **ensemble** method, or model averaging approach. The algorithm was invented by UC Berkeley's own Leo Breiman in 2001, who was also a co-creator of decision trees (see his [1984 CART book](https://www.amazon.com/Classification-Regression-Wadsworth-Statistics-Probability/dp/0412048418)).  
 
-Random forests are an extension of **bagging**, in which multiple samples of the original data are drawn with replacement (aka "bootstrap samples"). An algorithm is fit separately to each sample, then the average of those estimates is used for prediction. While bagging can be used by any algorithm, random forest uses decision trees as its base learner. Random forests add another level of randomness by also randomly sampling the features (or covariates) at each split in each decision tree. This makes the decision trees use different covariates and therefore be more unique. As a result, the average of these trees tends to be more accurate overall.
+Random forests are an extension of **bagging**, in which multiple samples of the original data are drawn with replacement (aka "bootstrap samples"). 1996 vs 2001 RF. 1997 random subspace. An algorithm is fit separately to each sample, then the average of those estimates is used for prediction. While bagging can be used by any algorithm, random forest uses decision trees as its base learner.
+
+Random forests add another level of randomness by also randomly sampling the features (or covariates) at each split in each decision tree. This makes the decision trees use different covariates and therefore be more unique. As a result, the average of these trees tends to be more accurate overall.
 
 ## Fit model
 
@@ -34,7 +38,7 @@ set.seed(1)
                    # Number of trees
                    num.trees = 500, 
                    # Number of variables randomly sampled as candidates at each split.
-                   mtry = 5, 
+                    mtry = 5,  # classification (1/0): sqrt(p); regression: p / 3
                    # Grow a probability forest?
                    probability = TRUE,
                    # We want the importance of predictors to be assessed.
@@ -90,6 +94,79 @@ ggplot(predicted_prob, aes(x = yes)) +
 ```
 
 How did it do? Are the accuracies for the training and test sets similar?  
+
+## Performance plateau
+
+```{r convergence}
+library(mlr)
+library(OOBCurve)
+
+set.seed(1, "L'Ecuyer-CMRG")
+
+# mlr wants covariates and outcome to be in the same dataframe.
+
+# For classification RF needs Y to be a factor.
+# We use the best mtry based on the CV.SL results from the final prediction library.
+# Takes 1 second.
+(rf_time = system.time({
+  # Ranger uses all available threads by default, nice.
+  y = as.factor(task_class$data[[task_class$outcome]]) 
+  rf = ranger::ranger(y ~ . ,
+                      data = task_class$data[, task_class$covariates],
+                      num.threads = RhpcBLASctl::get_num_cores(),
+                      # Need this option for OOB curve analysis.
+                      keep.inbag = TRUE,
+                      num.trees = 4000,
+                      # Could also do importance = "impurity".
+                      importance = "permutation",
+                      # Set based on separate grid/random search.
+                      mtry = 4L,
+                      # Set based on separate grid/random search.
+                      min.node.size = 5L)
+}))
+
+oob_data = task_class$data[, c(task_class$outcome, task_class$covariates), drop = FALSE]
+
+# Outcome needs to be a factor.
+oob_data[[task_class$outcome]] = as.factor(task_class$data[[task_class$outcome]])
+
+
+task = makeClassifTask(data = oob_data, target = task_class$outcome)
+# Current package has a bug such that multiple measures have to be specified.
+# We aren't using the Brier score though.
+# TODO: these results could be averaged over multiple random shufflings
+# of the tree ordering. Would give a more accurate, smoother curve.
+# This takes ~10 seconds.
+system.time({
+  results = OOBCurve(rf, measures = list(mlr::auc, mlr::brier), task = task,
+                     data = oob_data)
+})
+
+```
+
+### Interpet
+
+```{r rf_interpret}
+# Look at the OOB AUC with the maximum number of trees.
+# 0.89
+(rf_auc = results$auc[length(results$auc)])
+
+# Can zoom in to certain segments of the forest indexed by an ntree range.
+tree_start = 3
+#tree_start = 10
+tree_end = length(results$auc)
+x_span = seq(tree_start, tree_end)
+y_span = results$auc[x_span]
+
+ggplot(mapping = aes(x = x_span, y = y_span)) + geom_line() + theme_minimal() +
+  coord_fixed(ratio = 3) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0.5, 0.94)) +
+  scale_x_log10(breaks = c(3, 10, 30, 100, 300, 1000, 3000),
+                limits = c(3, 4000),
+                minor_breaks = NULL) +
+  labs(x = "Trees in the random forest", y = "Out of Bag AUC")
+
+```
 
 ## Challenge 3
 Open Challenge 3 in the "Challenges" folder. 
